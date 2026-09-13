@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kırlangıçkuyruk Dergi</title>
+
+<!-- ============================================================
+     PAYLAŞIM ÖNİZLEMESİ (Open Graph)
+     SITEADIN kısmını Netlify'ın verdiği gerçek adresle değiştir.
+     ============================================================ -->
+<meta property="og:title" content="Kırlangıçkuyruk Dergi">
+<meta property="og:description" content="Tüm sayılara buradan ücretsiz ulaşabilirsin.">
+<meta property="og:image" content="https://SITEADIN.netlify.app/sayi-1/kapak.jpg">
+<meta property="og:url" content="https://SITEADIN.netlify.app/">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+
+<style>
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+    background: #1a1a1a;
+    color: #eee;
+    font-family: Georgia, 'Times New Roman', serif;
+  }
+  header {
+    padding: 56px 24px 24px;
+    text-align: center;
+  }
+  header h1 {
+    margin: 0;
+    font-size: clamp(28px, 6vw, 44px);
+    font-weight: normal;
+    letter-spacing: 0.5px;
+  }
+  header p {
+    margin: 10px 0 0;
+    color: #999;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 14px;
+  }
+  #grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 24px;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 24px 56px;
+  }
+  .card {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.15s ease;
+  }
+  .card:hover {
+    transform: translateY(-4px);
+  }
+  .card img {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    border-radius: 4px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    display: block;
+    background: #2a2a2a;
+  }
+  .card .label {
+    margin-top: 10px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 14px;
+    text-align: center;
+    color: #ccc;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Kırlangıçkuyruk Dergi</h1>
+  <p>Bir sayı seç, okumaya başla</p>
+</header>
+
+<div id="grid"></div>
+
+<script>
+  // ================================================================
+  // YENİ BİR SAYI EKLEMEK İÇİN: aşağıdaki diziye aynı formatta
+  // bir obje daha ekle. cover ve link kendi klasör/dosya adına göre
+  // ayarlanmalı (örn. "sayi-2/index.html" ve "sayi-2/kapak_gorseli.png").
+  // ================================================================
+  const issues = [
+    {
+      title: "Sayı 1",
+      cover: "sayi-1/Kırlangıçkuyruk_Dergi_1.png",
+      link: "sayi-1/"
+    }
+    // { title: "Sayı 2", cover: "sayi-2/kapak.png", link: "sayi-2/" },
+  ];
+  // ================================================================
+
+  const grid = document.getElementById('grid');
+  issues.forEach(function (issue) {
+    const card = document.createElement('a');
+    card.href = issue.link;
+    card.className = 'card';
+
+    const img = document.createElement('img');
+    img.src = issue.cover;
+    img.alt = issue.title;
+
+    const label = document.createElement('div');
+    label.className = 'label';
+    label.textContent = issue.title;
+
+    card.appendChild(img);
+    card.appendChild(label);
+    grid.appendChild(card);
+  });
+</script>
+
+</body>
+</html>
