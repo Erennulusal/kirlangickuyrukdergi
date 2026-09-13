@@ -5,17 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kırlangıçkuyruk Dergi - Sayı 1</title>
 
-<!-- ============================================================
-     PAYLAŞIM ÖNİZLEMESİ (Open Graph)
-     Bu etiketler Instagram/WhatsApp/Twitter'da link paylaşınca
-     çıkan kart görselini ve başlığını belirler.
-     SITEADIN kısmını, Netlify sana verdiği gerçek adresle
-     değiştirmen gerekiyor (örn. kirlangickuyruk.netlify.app).
-     ============================================================ -->
+
 <meta property="og:title" content="Kırlangıçkuyruk Dergi - Sayı 1">
 <meta property="og:description" content="Dergimizin 1. sayısını buradan ücretsiz okuyabilirsin.">
-<meta property="og:image" content="https://SITEADIN.netlify.app/sayi-1/kapak.jpg">
-<meta property="og:url" content="https://SITEADIN.netlify.app/sayi-1/">
+<meta property="og:image" content="https://erennulusal.github.io/kirlangickuyrukdergi/sayi-1/kapak.png">
+<meta property="og:url" content="https://erennulusal.github.io/kirlangickuyrukdergi/sayi-1/">
 <meta property="og:type" content="article">
 <meta name="twitter:card" content="summary_large_image">
 
@@ -35,8 +29,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    /* Üstteki bar ve alttaki ipucu metni için yer bırakıyoruz,
-       böylece kitap onların üzerine binmiyor ya da ekrandan taşmıyor. */
+   
     padding: 84px 16px 56px;
   }
   #book {
@@ -182,10 +175,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/page-flip/dist/js/page-flip.browser.min.js"></script>
 <script>
-  // ================================================================
-  // BURAYI DÜZENLE: kendi görsellerinin dosya adlarını sırayla yaz.
-  // Görseller bu HTML dosyasıyla AYNI klasörde olmalı.
-  // ================================================================
+
   const pages = [
     "Kırlangıçkuyruk_Dergi_1.png",
     "Kırlangıçkuyruk_Dergi_2.png",
@@ -267,19 +257,16 @@
       (zeroBasedPage + 1) + ' / ' + pages.length;
   }
 
-  // Sayfanın en-boy oranına göre, hem GENİŞLİĞE hem YÜKSEKLİĞE göre
-  // kitabın ekrana tam sığacak boyutunu hesaplıyoruz. Ayrıca görselin
-  // GERÇEK çözünürlüğünden daha büyük göstermiyoruz; yoksa tarayıcı
-  // görseli olduğundan büyük çizip bulanıklaştırıyor.
+
   function computePageSize(ratio, naturalWidth) {
-    const topReserve = 96;    // üst bar için pay
-    const bottomReserve = 64; // alt ipucu metni için pay
+    const topReserve = 96;    
+    const bottomReserve = 64; 
     const sidePadding = 24;
 
     const availWidth = Math.max(280, window.innerWidth - sidePadding * 2);
     const availHeight = Math.max(320, window.innerHeight - topReserve - bottomReserve);
 
-    // Kitap açıkken iki sayfa yan yana durur (yayılım genişliği = 2 x sayfa genişliği)
+  
     let pageWidth = availWidth / 2;
     let pageHeight = pageWidth * ratio;
 
@@ -288,9 +275,7 @@
       pageWidth = pageHeight / ratio;
     }
 
-    // Görselin, ekranda kendi gerçek piksel sayısından daha fazla
-    // büyütülmemesi için üst sınır koyuyoruz (retina ekranlarda
-    // devicePixelRatio'yu da hesaba katıyoruz).
+
     if (naturalWidth) {
       const dpr = window.devicePixelRatio || 1;
       const maxWidthFromSource = naturalWidth / dpr;
@@ -308,13 +293,10 @@
 
   let coverRatio = null;
   let coverNaturalWidth = null;
-  let baseSize = null; // kitap ilk kurulduğunda hesaplanan iç boyut
+  let baseSize = null; 
 
   function updateBookScale() {
-    // Kitabı YENİDEN KURMUYORUZ (bu, tam ekrana geçince çökmeye/kaybolmaya
-    // sebep oluyordu). Bunun yerine sadece görsel olarak küçültüyoruz.
-    // Asla 1'in üzerine çıkarmıyoruz çünkü büyütmek görselin gerçek
-    // çözünürlüğünün üstüne çıkıp bulanıklaştırır.
+
     if (!baseSize || !coverRatio) return;
     const target = computePageSize(coverRatio, coverNaturalWidth);
     let scale = Math.min(target.width / baseSize.width, target.height / baseSize.height);
@@ -329,19 +311,11 @@
     bookEl.innerHTML = '';
     bookEl.style.transform = 'scale(1)';
 
-    // ---- Sayfa div'lerini oluştur ----
-    // ÖNEMLİ: loadFromImages() yerine loadFromHTML() kullanıyoruz.
-    // loadFromImages, görselleri bir <canvas> üzerine çiziyor ve bu,
-    // retina/yüksek DPI ekranlarda (devicePixelRatio > 1) bloklu/pikselli
-    // görünüme sebep oluyor — kaynak görsel ne kadar yüksek çözünürlüklü
-    // olursa olsun. loadFromHTML ise normal <img> etiketleri kullanıyor,
-    // tarayıcının kendi (DPI'a duyarlı) görsel ölçekleme motorunu
-    // kullanıyor, bu yüzden her ekranda net görünüyor.
+
     pages.forEach(function (src, idx) {
       const pageDiv = document.createElement('div');
       pageDiv.className = 'page';
       if (idx === 0 || idx === pages.length - 1) {
-        // ilk ve son sayfa: sert kapak
         pageDiv.setAttribute('data-density', 'hard');
       }
       const img = document.createElement('img');
@@ -360,7 +334,7 @@
       usePortrait: true
     });
 
-    // init ve flip dinleyicilerini loadFromHTML'den ÖNCE bağlamak gerekiyor
+
     pageFlip.on('init', function (e) {
       let initial = e.data.page;
       if (typeof startPage === 'number' && startPage >= 0 && startPage < pages.length) {
@@ -386,9 +360,7 @@
     pageFlip.loadFromHTML(bookEl.querySelectorAll('.page'));
   }
 
-  // Kapak görselinin oranını ve gerçek çözünürlüğünü bulmak için
-  // önce onu yüklüyoruz. (Diğer sayfaların da benzer çözünürlükte
-  // olduğunu varsayıyoruz.)
+
   const testImg = new Image();
   testImg.onload = function () {
     coverRatio = testImg.naturalHeight / testImg.naturalWidth;
@@ -401,10 +373,7 @@
   };
   testImg.src = pages[0];
 
-  // Pencere yeniden boyutlandırıldığında ya da tam ekrana girip
-  // çıkıldığında kitabı YENİDEN KURMADAN, sadece görsel olarak
-  // ölçeklendiriyoruz (bkz. updateBookScale). Bu, kütüphaneyi tekrar
-  // başlatmanın sebep olduğu çökme/kaybolma riskini ortadan kaldırıyor.
+
   let resizeTimer = null;
   window.addEventListener('resize', function () {
     clearTimeout(resizeTimer);
@@ -431,10 +400,9 @@
     if (e.key === 'Enter') goToTypedPage();
   });
 
-  // ---- Klavye ok tuşlarıyla sayfa çevirme ----
+
   document.addEventListener('keydown', function (e) {
-    // Kullanıcı sayfa numarası kutusuna yazıyorsa ok tuşlarını sayfa
-    // çevirmek için kullanma (yoksa hem sayı hem sayfa değişir).
+
     if (document.activeElement === pageInput) return;
     if (!pageFlip) return;
 
@@ -447,7 +415,7 @@
     }
   });
 
-  // ---- Tam ekran butonu ----
+
   const fullscreenBtn = document.getElementById('fullscreenBtn');
 
   function isFullscreen() {
