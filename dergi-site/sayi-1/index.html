@@ -282,6 +282,16 @@
   function computePageSize(ratio, naturalWidth) {
     const { availWidth, availHeight } = applyReserves();
 
+
+  function computePageSize(ratio, naturalWidth) {
+    const topReserve = 96;    
+    const bottomReserve = 64; 
+    const sidePadding = 24;
+
+    const availWidth = Math.max(280, window.innerWidth - sidePadding * 2);
+    const availHeight = Math.max(320, window.innerHeight - topReserve - bottomReserve);
+
+  
     let pageWidth = availWidth / 2;
     let pageHeight = pageWidth * ratio;
 
@@ -309,6 +319,7 @@
   let coverRatio = null;
   let coverNaturalWidth = null;
 
+
   // Pencere boyutu her değiştiğinde (yeniden boyutlandırma, tam ekrana
   // giriş/çıkış, mobilde adres çubuğunun gizlenmesi vs.) kitabı CSS ile
   // küçültüp bulanıklaştırmak yerine, o anki gerçek piksel ölçüleriyle
@@ -321,6 +332,17 @@
       pageFlip = null;
     }
     buildBook(coverRatio, current);
+
+  let baseSize = null; 
+
+  function updateBookScale() {
+
+    if (!baseSize || !coverRatio) return;
+    const target = computePageSize(coverRatio, coverNaturalWidth);
+    let scale = Math.min(target.width / baseSize.width, target.height / baseSize.height);
+    if (!isFinite(scale) || scale <= 0) scale = 1;
+    scale = Math.min(scale, 1);
+    bookEl.style.transform = 'scale(' + scale + ')';
   }
 
   function buildBook(ratio, startPage) {
