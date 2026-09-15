@@ -5,17 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kırlangıçkuyruk Dergi - Sayı 1</title>
 
-<!-- ============================================================
-     PAYLAŞIM ÖNİZLEMESİ (Open Graph)
-     Bu etiketler Instagram/WhatsApp/Twitter'da link paylaşınca
-     çıkan kart görselini ve başlığını belirler.
-     SITEADIN kısmını, Netlify sana verdiği gerçek adresle
-     değiştirmen gerekiyor (örn. kirlangickuyruk.netlify.app).
-     ============================================================ -->
+
 <meta property="og:title" content="Kırlangıçkuyruk Dergi - Sayı 1">
 <meta property="og:description" content="Dergimizin 1. sayısını buradan ücretsiz okuyabilirsin.">
-<meta property="og:image" content="https://SITEADIN.netlify.app/sayi-1/kapak.jpg">
-<meta property="og:url" content="https://SITEADIN.netlify.app/sayi-1/">
+<meta property="og:image" content="https://erennulusal.github.io/kirlangickuyrukdergi/sayi-1/kapak.png">
+<meta property="og:url" content="https://erennulusal.github.io/kirlangickuyrukdergi/sayi-1/">
 <meta property="og:type" content="article">
 <meta name="twitter:card" content="summary_large_image">
 
@@ -35,13 +29,11 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    /* Üstteki bar ve alttaki ipucu metni için yer bırakıyoruz,
-       böylece kitap onların üzerine binmiyor ya da ekrandan taşmıyor. */
+   
     padding: 84px 16px 56px;
   }
   #book {
     box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-    transition: transform 0.2s ease;
   }
   .page {
     background: #fff;
@@ -170,7 +162,7 @@
 <div id="hint">Sayfaları çevirmek için sürükle ya da tıkla</div>
 
 <div id="topBar">
-  <a href="../" class="back-link">Tüm sayılar</a>
+  <a href="../../index.html" class="back-link">Tüm sayılar</a>
   <div class="jump-group">
     <span class="jlabel">Sayfaya git:</span>
     <input type="number" id="pageInput" min="1" placeholder="1-66">
@@ -182,77 +174,74 @@
 
 <script src="https://cdn.jsdelivr.net/npm/page-flip/dist/js/page-flip.browser.min.js"></script>
 <script>
-  // ================================================================
-  // BURAYI DÜZENLE: kendi görsellerinin dosya adlarını sırayla yaz.
-  // Görseller bu HTML dosyasıyla AYNI klasörde olmalı.
-  // ================================================================
+
   const pages = [
-    "Kırlangıçkuyruk_Dergi_1.png",
-    "Kırlangıçkuyruk_Dergi_2.png",
-    "Kırlangıçkuyruk_Dergi_3.png",
-    "Kırlangıçkuyruk_Dergi_4.png",
-    "Kırlangıçkuyruk_Dergi_5.png",
-    "Kırlangıçkuyruk_Dergi_6.png",
-    "Kırlangıçkuyruk_Dergi_7.png",
-    "Kırlangıçkuyruk_Dergi_8.png",
-    "Kırlangıçkuyruk_Dergi_9.png",
-    "Kırlangıçkuyruk_Dergi_10.png",
-    "Kırlangıçkuyruk_Dergi_11.png",
-    "Kırlangıçkuyruk_Dergi_12.png",
-    "Kırlangıçkuyruk_Dergi_13.png",
-    "Kırlangıçkuyruk_Dergi_14.png",
-    "Kırlangıçkuyruk_Dergi_15.png",
-    "Kırlangıçkuyruk_Dergi_16.png",
-    "Kırlangıçkuyruk_Dergi_17.png",
-    "Kırlangıçkuyruk_Dergi_18.png",
-    "Kırlangıçkuyruk_Dergi_19.png",
-    "Kırlangıçkuyruk_Dergi_20.png",
-    "Kırlangıçkuyruk_Dergi_21.png",
-    "Kırlangıçkuyruk_Dergi_22.png",
-    "Kırlangıçkuyruk_Dergi_23.png",
-    "Kırlangıçkuyruk_Dergi_24.png",
-    "Kırlangıçkuyruk_Dergi_25.png",
-    "Kırlangıçkuyruk_Dergi_26.png",
-    "Kırlangıçkuyruk_Dergi_27.png",
-    "Kırlangıçkuyruk_Dergi_28.png",
-    "Kırlangıçkuyruk_Dergi_29.png",
-    "Kırlangıçkuyruk_Dergi_30.png",
-    "Kırlangıçkuyruk_Dergi_31.png",
-    "Kırlangıçkuyruk_Dergi_32.png",
-    "Kırlangıçkuyruk_Dergi_33.png",
-    "Kırlangıçkuyruk_Dergi_34.png",
-    "Kırlangıçkuyruk_Dergi_35.png",
-    "Kırlangıçkuyruk_Dergi_36.png",
-    "Kırlangıçkuyruk_Dergi_37.png",
-    "Kırlangıçkuyruk_Dergi_38.png",
-    "Kırlangıçkuyruk_Dergi_39.png",
-    "Kırlangıçkuyruk_Dergi_40.png",
-    "Kırlangıçkuyruk_Dergi_41.png",
-    "Kırlangıçkuyruk_Dergi_42.png",
-    "Kırlangıçkuyruk_Dergi_43.png",
-    "Kırlangıçkuyruk_Dergi_44.png",
-    "Kırlangıçkuyruk_Dergi_45.png",
-    "Kırlangıçkuyruk_Dergi_46.png",
-    "Kırlangıçkuyruk_Dergi_47.png",
-    "Kırlangıçkuyruk_Dergi_48.png",
-    "Kırlangıçkuyruk_Dergi_49.png",
-    "Kırlangıçkuyruk_Dergi_50.png",
-    "Kırlangıçkuyruk_Dergi_51.png",
-    "Kırlangıçkuyruk_Dergi_52.png",
-    "Kırlangıçkuyruk_Dergi_53.png",
-    "Kırlangıçkuyruk_Dergi_54.png",
-    "Kırlangıçkuyruk_Dergi_55.png",
-    "Kırlangıçkuyruk_Dergi_56.png",
-    "Kırlangıçkuyruk_Dergi_57.png",
-    "Kırlangıçkuyruk_Dergi_58.png",
-    "Kırlangıçkuyruk_Dergi_59.png",
-    "Kırlangıçkuyruk_Dergi_60.png",
-    "Kırlangıçkuyruk_Dergi_61.png",
-    "Kırlangıçkuyruk_Dergi_62.png",
-    "Kırlangıçkuyruk_Dergi_63.png",
-    "Kırlangıçkuyruk_Dergi_64.png",
-    "Kırlangıçkuyruk_Dergi_65.png",
-    "Kırlangıçkuyruk_Dergi_66.png"
+    "Kırlangıçkuyruk_Dergi_1.jpg",
+    "Kırlangıçkuyruk_Dergi_2.jpg",
+    "Kırlangıçkuyruk_Dergi_3.jpg",
+    "Kırlangıçkuyruk_Dergi_4.jpg",
+    "Kırlangıçkuyruk_Dergi_5.jpg",
+    "Kırlangıçkuyruk_Dergi_6.jpg",
+    "Kırlangıçkuyruk_Dergi_7.jpg",
+    "Kırlangıçkuyruk_Dergi_8.jpg",
+    "Kırlangıçkuyruk_Dergi_9.jpg",
+    "Kırlangıçkuyruk_Dergi_10.jpg",
+    "Kırlangıçkuyruk_Dergi_11.jpg",
+    "Kırlangıçkuyruk_Dergi_12.jpg",
+    "Kırlangıçkuyruk_Dergi_13.jpg",
+    "Kırlangıçkuyruk_Dergi_14.jpg",
+    "Kırlangıçkuyruk_Dergi_15.jpg",
+    "Kırlangıçkuyruk_Dergi_16.jpg",
+    "Kırlangıçkuyruk_Dergi_17.jpg",
+    "Kırlangıçkuyruk_Dergi_18.jpg",
+    "Kırlangıçkuyruk_Dergi_19.jpg",
+    "Kırlangıçkuyruk_Dergi_20.jpg",
+    "Kırlangıçkuyruk_Dergi_21.jpg",
+    "Kırlangıçkuyruk_Dergi_22.jpg",
+    "Kırlangıçkuyruk_Dergi_23.jpg",
+    "Kırlangıçkuyruk_Dergi_24.jpg",
+    "Kırlangıçkuyruk_Dergi_25.jpg",
+    "Kırlangıçkuyruk_Dergi_26.jpg",
+    "Kırlangıçkuyruk_Dergi_27.jpg",
+    "Kırlangıçkuyruk_Dergi_28.jpg",
+    "Kırlangıçkuyruk_Dergi_29.jpg",
+    "Kırlangıçkuyruk_Dergi_30.jpg",
+    "Kırlangıçkuyruk_Dergi_31.jpg",
+    "Kırlangıçkuyruk_Dergi_32.jpg",
+    "Kırlangıçkuyruk_Dergi_33.jpg",
+    "Kırlangıçkuyruk_Dergi_34.jpg",
+    "Kırlangıçkuyruk_Dergi_35.jpg",
+    "Kırlangıçkuyruk_Dergi_36.jpg",
+    "Kırlangıçkuyruk_Dergi_37.jpg",
+    "Kırlangıçkuyruk_Dergi_38.jpg",
+    "Kırlangıçkuyruk_Dergi_39.jpg",
+    "Kırlangıçkuyruk_Dergi_40.jpg",
+    "Kırlangıçkuyruk_Dergi_41.jpg",
+    "Kırlangıçkuyruk_Dergi_42.jpg",
+    "Kırlangıçkuyruk_Dergi_43.jpg",
+    "Kırlangıçkuyruk_Dergi_44.jpg",
+    "Kırlangıçkuyruk_Dergi_45.jpg",
+    "Kırlangıçkuyruk_Dergi_46.jpg",
+    "Kırlangıçkuyruk_Dergi_47.jpg",
+    "Kırlangıçkuyruk_Dergi_48.jpg",
+    "Kırlangıçkuyruk_Dergi_49.jpg",
+    "Kırlangıçkuyruk_Dergi_50.jpg",
+    "Kırlangıçkuyruk_Dergi_51.jpg",
+    "Kırlangıçkuyruk_Dergi_52.jpg",
+    "Kırlangıçkuyruk_Dergi_53.jpg",
+    "Kırlangıçkuyruk_Dergi_54.jpg",
+    "Kırlangıçkuyruk_Dergi_55.jpg",
+    "Kırlangıçkuyruk_Dergi_56.jpg",
+    "Kırlangıçkuyruk_Dergi_57.jpg",
+    "Kırlangıçkuyruk_Dergi_58.jpg",
+    "Kırlangıçkuyruk_Dergi_59.jpg",
+    "Kırlangıçkuyruk_Dergi_60.jpg",
+    "Kırlangıçkuyruk_Dergi_61.jpg",
+    "Kırlangıçkuyruk_Dergi_62.jpg",
+    "Kırlangıçkuyruk_Dergi_63.jpg",
+    "Kırlangıçkuyruk_Dergi_64.jpg",
+    "Kırlangıçkuyruk_Dergi_65.jpg",
+    "Kırlangıçkuyruk_Dergi_66.jpg"
   ];
   // ================================================================
 
@@ -260,6 +249,9 @@
   document.getElementById('pageInput').setAttribute('placeholder', '1-' + pages.length);
 
   const bookEl = document.getElementById('book');
+  const wrapperEl = document.getElementById('wrapper');
+  const topBarEl = document.getElementById('topBar');
+  const hintEl = document.getElementById('hint');
   let pageFlip = null;
 
   function updateIndicator(zeroBasedPage) {
@@ -267,19 +259,29 @@
       (zeroBasedPage + 1) + ' / ' + pages.length;
   }
 
-  // Sayfanın en-boy oranına göre, hem GENİŞLİĞE hem YÜKSEKLİĞE göre
-  // kitabın ekrana tam sığacak boyutunu hesaplıyoruz. Ayrıca görselin
-  // GERÇEK çözünürlüğünden daha büyük göstermiyoruz; yoksa tarayıcı
-  // görseli olduğundan büyük çizip bulanıklaştırıyor.
+
+  // topBar ve hint'in GERÇEK yüksekliğini ölçüp #wrapper'ın boşluğunu
+  // ona göre ayarlıyoruz. Böylece hem GUI kitabın üstüne binmiyor,
+  // hem de gereğinden fazla boşluk bırakılıp kitap küçük kalmıyor.
+  function applyReserves() {
+    const gap = 16; // GUI ile kitap arasındaki nefes payı
+    const topBarRect = topBarEl.getBoundingClientRect();
+    const hintRect = hintEl.getBoundingClientRect();
+    const topReserve = Math.ceil(topBarRect.bottom + gap);
+    const bottomReserve = Math.ceil((window.innerHeight - hintRect.top) + gap);
+    const sidePadding = window.innerWidth < 700 ? 12 : 20;
+
+    wrapperEl.style.padding = topReserve + 'px ' + sidePadding + 'px ' + bottomReserve + 'px';
+
+    return {
+      availWidth: Math.max(280, window.innerWidth - sidePadding * 2),
+      availHeight: Math.max(320, window.innerHeight - topReserve - bottomReserve)
+    };
+  }
+
   function computePageSize(ratio, naturalWidth) {
-    const topReserve = 96;    // üst bar için pay
-    const bottomReserve = 64; // alt ipucu metni için pay
-    const sidePadding = 24;
+    const { availWidth, availHeight } = applyReserves();
 
-    const availWidth = Math.max(280, window.innerWidth - sidePadding * 2);
-    const availHeight = Math.max(320, window.innerHeight - topReserve - bottomReserve);
-
-    // Kitap açıkken iki sayfa yan yana durur (yayılım genişliği = 2 x sayfa genişliği)
     let pageWidth = availWidth / 2;
     let pageHeight = pageWidth * ratio;
 
@@ -288,9 +290,7 @@
       pageWidth = pageHeight / ratio;
     }
 
-    // Görselin, ekranda kendi gerçek piksel sayısından daha fazla
-    // büyütülmemesi için üst sınır koyuyoruz (retina ekranlarda
-    // devicePixelRatio'yu da hesaba katıyoruz).
+
     if (naturalWidth) {
       const dpr = window.devicePixelRatio || 1;
       const maxWidthFromSource = naturalWidth / dpr;
@@ -308,40 +308,30 @@
 
   let coverRatio = null;
   let coverNaturalWidth = null;
-  let baseSize = null; // kitap ilk kurulduğunda hesaplanan iç boyut
 
-  function updateBookScale() {
-    // Kitabı YENİDEN KURMUYORUZ (bu, tam ekrana geçince çökmeye/kaybolmaya
-    // sebep oluyordu). Bunun yerine sadece görsel olarak küçültüyoruz.
-    // Asla 1'in üzerine çıkarmıyoruz çünkü büyütmek görselin gerçek
-    // çözünürlüğünün üstüne çıkıp bulanıklaştırır.
-    if (!baseSize || !coverRatio) return;
-    const target = computePageSize(coverRatio, coverNaturalWidth);
-    let scale = Math.min(target.width / baseSize.width, target.height / baseSize.height);
-    if (!isFinite(scale) || scale <= 0) scale = 1;
-    scale = Math.min(scale, 1);
-    bookEl.style.transform = 'scale(' + scale + ')';
+  // Pencere boyutu her değiştiğinde (yeniden boyutlandırma, tam ekrana
+  // giriş/çıkış, mobilde adres çubuğunun gizlenmesi vs.) kitabı CSS ile
+  // küçültüp bulanıklaştırmak yerine, o anki gerçek piksel ölçüleriyle
+  // SIFIRDAN kuruyoruz. Bu yüzden sayfalar her zaman keskin kalıyor.
+  function rebuildAtCurrentPage() {
+    if (!coverRatio) return;
+    const current = pageFlip ? pageFlip.getCurrentPageIndex() : 0;
+    if (pageFlip) {
+      pageFlip.destroy();
+      pageFlip = null;
+    }
+    buildBook(coverRatio, current);
   }
 
   function buildBook(ratio, startPage) {
     const size = computePageSize(ratio, coverNaturalWidth);
-    baseSize = size;
     bookEl.innerHTML = '';
-    bookEl.style.transform = 'scale(1)';
 
-    // ---- Sayfa div'lerini oluştur ----
-    // ÖNEMLİ: loadFromImages() yerine loadFromHTML() kullanıyoruz.
-    // loadFromImages, görselleri bir <canvas> üzerine çiziyor ve bu,
-    // retina/yüksek DPI ekranlarda (devicePixelRatio > 1) bloklu/pikselli
-    // görünüme sebep oluyor — kaynak görsel ne kadar yüksek çözünürlüklü
-    // olursa olsun. loadFromHTML ise normal <img> etiketleri kullanıyor,
-    // tarayıcının kendi (DPI'a duyarlı) görsel ölçekleme motorunu
-    // kullanıyor, bu yüzden her ekranda net görünüyor.
+
     pages.forEach(function (src, idx) {
       const pageDiv = document.createElement('div');
       pageDiv.className = 'page';
       if (idx === 0 || idx === pages.length - 1) {
-        // ilk ve son sayfa: sert kapak
         pageDiv.setAttribute('data-density', 'hard');
       }
       const img = document.createElement('img');
@@ -360,7 +350,7 @@
       usePortrait: true
     });
 
-    // init ve flip dinleyicilerini loadFromHTML'den ÖNCE bağlamak gerekiyor
+
     pageFlip.on('init', function (e) {
       let initial = e.data.page;
       if (typeof startPage === 'number' && startPage >= 0 && startPage < pages.length) {
@@ -386,9 +376,7 @@
     pageFlip.loadFromHTML(bookEl.querySelectorAll('.page'));
   }
 
-  // Kapak görselinin oranını ve gerçek çözünürlüğünü bulmak için
-  // önce onu yüklüyoruz. (Diğer sayfaların da benzer çözünürlükte
-  // olduğunu varsayıyoruz.)
+
   const testImg = new Image();
   testImg.onload = function () {
     coverRatio = testImg.naturalHeight / testImg.naturalWidth;
@@ -401,14 +389,11 @@
   };
   testImg.src = pages[0];
 
-  // Pencere yeniden boyutlandırıldığında ya da tam ekrana girip
-  // çıkıldığında kitabı YENİDEN KURMADAN, sadece görsel olarak
-  // ölçeklendiriyoruz (bkz. updateBookScale). Bu, kütüphaneyi tekrar
-  // başlatmanın sebep olduğu çökme/kaybolma riskini ortadan kaldırıyor.
+
   let resizeTimer = null;
   window.addEventListener('resize', function () {
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(updateBookScale, 150);
+    resizeTimer = setTimeout(rebuildAtCurrentPage, 200);
   });
 
   // ---- Sayfaya git kutusu ----
@@ -431,10 +416,9 @@
     if (e.key === 'Enter') goToTypedPage();
   });
 
-  // ---- Klavye ok tuşlarıyla sayfa çevirme ----
+
   document.addEventListener('keydown', function (e) {
-    // Kullanıcı sayfa numarası kutusuna yazıyorsa ok tuşlarını sayfa
-    // çevirmek için kullanma (yoksa hem sayı hem sayfa değişir).
+
     if (document.activeElement === pageInput) return;
     if (!pageFlip) return;
 
@@ -447,7 +431,7 @@
     }
   });
 
-  // ---- Tam ekran butonu ----
+
   const fullscreenBtn = document.getElementById('fullscreenBtn');
 
   function isFullscreen() {
@@ -471,11 +455,11 @@
 
   document.addEventListener('fullscreenchange', function () {
     updateFullscreenLabel();
-    updateBookScale();
+    rebuildAtCurrentPage();
   });
   document.addEventListener('webkitfullscreenchange', function () {
     updateFullscreenLabel();
-    updateBookScale();
+    rebuildAtCurrentPage();
   });
 </script>
 
