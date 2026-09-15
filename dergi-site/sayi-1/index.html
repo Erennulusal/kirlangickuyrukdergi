@@ -29,8 +29,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-   
-    padding: 84px 16px 56px;
+    padding: 70px 14px 46px;
   }
   #book {
     box-shadow: 0 10px 40px rgba(0,0,0,0.5);
@@ -248,7 +247,7 @@
   document.getElementById('pageInput').setAttribute('max', pages.length);
   document.getElementById('pageInput').setAttribute('placeholder', '1-' + pages.length);
 
-  const bookEl = document.getElementById('book');
+  let bookEl = document.getElementById('book'); // "let": her rebuild'de yeni elemanla değiştiriliyor
   const wrapperEl = document.getElementById('wrapper');
   const topBarEl = document.getElementById('topBar');
   const hintEl = document.getElementById('hint');
@@ -259,17 +258,16 @@
       (zeroBasedPage + 1) + ' / ' + pages.length;
   }
 
-
   // topBar ve hint'in GERÇEK yüksekliğini ölçüp #wrapper'ın boşluğunu
-  // ona göre ayarlıyoruz. Böylece hem GUI kitabın üstüne binmiyor,
-  // hem de gereğinden fazla boşluk bırakılıp kitap küçük kalmıyor.
+  // ona göre ayarlıyoruz. GUI kitabın üstüne binmiyor, ama gereğinden
+  // fazla boşluk da bırakılmıyor - kitap mümkün olduğunca büyük kalıyor.
   function applyReserves() {
-    const gap = 16; // GUI ile kitap arasındaki nefes payı
+    const gap = 10; // GUI ile kitap arasındaki nefes payı
     const topBarRect = topBarEl.getBoundingClientRect();
     const hintRect = hintEl.getBoundingClientRect();
     const topReserve = Math.ceil(topBarRect.bottom + gap);
     const bottomReserve = Math.ceil((window.innerHeight - hintRect.top) + gap);
-    const sidePadding = window.innerWidth < 700 ? 12 : 20;
+    const sidePadding = window.innerWidth < 700 ? 8 : 16;
 
     wrapperEl.style.padding = topReserve + 'px ' + sidePadding + 'px ' + bottomReserve + 'px';
 
@@ -282,16 +280,6 @@
   function computePageSize(ratio, naturalWidth) {
     const { availWidth, availHeight } = applyReserves();
 
-
-  function computePageSize(ratio, naturalWidth) {
-    const topReserve = 96;    
-    const bottomReserve = 64; 
-    const sidePadding = 24;
-
-    const availWidth = Math.max(280, window.innerWidth - sidePadding * 2);
-    const availHeight = Math.max(320, window.innerHeight - topReserve - bottomReserve);
-
-  
     let pageWidth = availWidth / 2;
     let pageHeight = pageWidth * ratio;
 
@@ -299,7 +287,6 @@
       pageHeight = availHeight;
       pageWidth = pageHeight / ratio;
     }
-
 
     if (naturalWidth) {
       const dpr = window.devicePixelRatio || 1;
@@ -319,7 +306,6 @@
   let coverRatio = null;
   let coverNaturalWidth = null;
 
-
   // Pencere boyutu her değiştiğinde (yeniden boyutlandırma, tam ekrana
   // giriş/çıkış, mobilde adres çubuğunun gizlenmesi vs.) kitabı CSS ile
   // küçültüp bulanıklaştırmak yerine, o anki gerçek piksel ölçüleriyle
@@ -332,23 +318,25 @@
       pageFlip = null;
     }
     buildBook(coverRatio, current);
-
-  let baseSize = null; 
-
-  function updateBookScale() {
-
-    if (!baseSize || !coverRatio) return;
-    const target = computePageSize(coverRatio, coverNaturalWidth);
-    let scale = Math.min(target.width / baseSize.width, target.height / baseSize.height);
-    if (!isFinite(scale) || scale <= 0) scale = 1;
-    scale = Math.min(scale, 1);
-    bookEl.style.transform = 'scale(' + scale + ')';
   }
 
   function buildBook(ratio, startPage) {
     const size = computePageSize(ratio, coverNaturalWidth);
-    bookEl.innerHTML = '';
 
+    // ÖNEMLİ DÜZELTME: pageFlip.destroy() sadece içeriği temizlemiyor,
+    // bağlı olduğu #book elemanının KENDİSİNİ DOM'dan kaldırıyor
+    // ("Remove a root HTML element" - StPageFlip dokümantasyonu).
+    // Aynı (artık kaldırılmış) elemanı tekrar kullanmaya çalışmak,
+    // özellikle tam ekrana geçince kitabın görünmez olmasına sebep
+    // oluyordu. Çözüm: her kurulumda sıfırdan yeni bir #book elemanı
+    // oluşturup onu kullanmak.
+    const oldBookEl = document.getElementById('book');
+    if (oldBookEl && oldBookEl.parentNode) {
+      oldBookEl.parentNode.removeChild(oldBookEl);
+    }
+    bookEl = document.createElement('div');
+    bookEl.id = 'book';
+    wrapperEl.appendChild(bookEl);
 
     pages.forEach(function (src, idx) {
       const pageDiv = document.createElement('div');
@@ -371,7 +359,6 @@
       mobileScrollSupport: true,
       usePortrait: true
     });
-
 
     pageFlip.on('init', function (e) {
       let initial = e.data.page;
@@ -398,7 +385,6 @@
     pageFlip.loadFromHTML(bookEl.querySelectorAll('.page'));
   }
 
-
   const testImg = new Image();
   testImg.onload = function () {
     coverRatio = testImg.naturalHeight / testImg.naturalWidth;
@@ -410,7 +396,6 @@
       "Görsel bulunamadı. 'pages' listesindeki dosya adlarını kontrol et.";
   };
   testImg.src = pages[0];
-
 
   let resizeTimer = null;
   window.addEventListener('resize', function () {
@@ -438,9 +423,7 @@
     if (e.key === 'Enter') goToTypedPage();
   });
 
-
   document.addEventListener('keydown', function (e) {
-
     if (document.activeElement === pageInput) return;
     if (!pageFlip) return;
 
@@ -452,7 +435,6 @@
       pageFlip.flipPrev('top');
     }
   });
-
 
   const fullscreenBtn = document.getElementById('fullscreenBtn');
 
