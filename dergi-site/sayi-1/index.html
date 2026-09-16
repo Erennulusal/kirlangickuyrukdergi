@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kırlangıçkuyruk Dergi - Sayı 1</title>
 
+<!-- Site logosu / sekme ikonu. favicon.svg dosyası deponun KÖK klasöründe
+     olmalı (index.html ile aynı yerde). Bu sayfa dergi-site/sayi-1/ içinde
+     olduğu için iki klasör yukarı çıkıyoruz. -->
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
 
 <meta property="og:title" content="Kırlangıçkuyruk Dergi - Sayı 1">
 <meta property="og:description" content="Dergimizin 1. sayısını buradan ücretsiz okuyabilirsin.">
@@ -151,6 +155,52 @@
     text-align: center;
     white-space: nowrap;
   }
+
+  /* ---- TELEFON MODU ----
+     Dar ekranlarda üst bar ekrana sığsın diye sıkılaştırıyoruz:
+     yazılar küçülüyor, aralar daralıyor, "Sayfaya git:" etiketi ve
+     tam ekran butonunun yazısı gizleniyor (ikon kalıyor). Masaüstü
+     görünümü bundan hiç etkilenmiyor. */
+  @media (max-width: 700px) {
+    #topBar {
+      top: 8px;
+      gap: 8px;
+      padding: 6px 12px;
+      max-width: calc(100vw - 16px);
+    }
+    #topBar a.back-link {
+      font-size: 12px;
+      padding-right: 8px;
+    }
+    .jump-group { gap: 5px; }
+    .jump-group .jlabel { display: none; }
+    #pageInput {
+      width: 42px;
+      font-size: 12px;
+      padding: 5px 3px;
+    }
+    #pageGoBtn {
+      font-size: 12px;
+      padding: 5px 10px;
+    }
+    #pageIndicator {
+      font-size: 11px;
+      padding: 4px 9px;
+      min-width: 40px;
+    }
+    #fullscreenBtn {
+      font-size: 0;            /* yazıyı gizle, sadece ikon kalsın */
+      padding: 5px 0 5px 10px;
+    }
+    #fullscreenBtn::before {
+      content: '⛶';
+      font-size: 15px;
+    }
+    #hint {
+      font-size: 11px;
+      bottom: 10px;
+    }
+  }
 </style>
 </head>
 <body>
@@ -277,10 +327,19 @@
     };
   }
 
+  // TELEFON MODU: dar ekranlarda dergiyi çift sayfa (spread) yerine
+  // TEK sayfa olarak gösteriyoruz. Bunu ayrı bir ayarla değil, sayfa
+  // genişliğini hesaplarken ikiye bölmeyerek yapıyoruz: sayfa, kabına
+  // sığmayacak kadar geniş olunca StPageFlip zaten kendiliğinden
+  // "portrait" (tek sayfa) moduna geçiyor (usePortrait: true sayesinde).
+  function isSinglePageMode() {
+    return window.innerWidth < 700;
+  }
+
   function computePageSize(ratio, naturalWidth) {
     const { availWidth, availHeight } = applyReserves();
 
-    let pageWidth = availWidth / 2;
+    let pageWidth = isSinglePageMode() ? availWidth : availWidth / 2;
     let pageHeight = pageWidth * ratio;
 
     if (pageHeight > availHeight) {
@@ -357,7 +416,13 @@
       size: "fixed",
       showCover: true,
       mobileScrollSupport: true,
-      usePortrait: true
+      usePortrait: true,
+      // Telefon modunda (tek sayfa) çevirme animasyonu tamamen kapalı:
+      // sayfa anında değişiyor, kıvrılma/gölge yok. Masaüstünde
+      // (çift sayfa/spread) animasyon aynen eskisi gibi çalışmaya devam
+      // ediyor.
+      flippingTime: isSinglePageMode() ? 1 : 1000,
+      drawShadow: !isSinglePageMode()
     });
 
     pageFlip.on('init', function (e) {
