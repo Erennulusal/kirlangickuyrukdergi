@@ -133,6 +133,13 @@
   #pageGoBtn:hover, #fullscreenBtn:hover {
     background: #ddb35c;
   }
+  #pageGoBtn {
+    background: #4715ab;
+    color: #fff;
+  }
+  #pageGoBtn:hover {
+    background: #5c22d6;
+  }
   #fullscreenBtn {
     padding-left: 16px;
     border-left: 1px solid rgba(255,255,255,0.15);
@@ -379,7 +386,16 @@
     buildBook(coverRatio, current);
   }
 
+  // Alt ipucu yazısı, telefon modunda artık tıklama değil kaydırma
+  // (swipe) ile sayfa çevrildiğini belirtecek şekilde güncelleniyor.
+  function updateHintText() {
+    hintEl.textContent = isSinglePageMode()
+      ? 'Sayfaları çevirmek için parmağınla sağa/sola kaydır'
+      : 'Sayfaları çevirmek için sürükle ya da tıkla';
+  }
+
   function buildBook(ratio, startPage) {
+    updateHintText();
     const size = computePageSize(ratio, coverNaturalWidth);
 
     // ÖNEMLİ DÜZELTME: pageFlip.destroy() sadece içeriği temizlemiyor,
@@ -422,7 +438,11 @@
       // (çift sayfa/spread) animasyon aynen eskisi gibi çalışmaya devam
       // ediyor.
       flippingTime: isSinglePageMode() ? 1 : 1000,
-      drawShadow: !isSinglePageMode()
+      drawShadow: !isSinglePageMode(),
+      // Telefon modunda (tek sayfa) tıklayarak sayfa çevirmeyi kapatıyoruz;
+      // sayfa sadece parmakla sağa/sola kaydırınca (swipe) değişiyor.
+      // Masaüstünde (çift sayfa) eskisi gibi tıklama ile de çevrilebiliyor.
+      disableFlipByClick: isSinglePageMode()
     });
 
     pageFlip.on('init', function (e) {
