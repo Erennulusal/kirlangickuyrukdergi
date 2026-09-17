@@ -439,10 +439,15 @@
       // ediyor.
       flippingTime: isSinglePageMode() ? 1 : 1000,
       drawShadow: !isSinglePageMode(),
-      // Telefon modunda (tek sayfa) tıklayarak sayfa çevirmeyi kapatıyoruz;
-      // sayfa sadece parmakla sağa/sola kaydırınca (swipe) değişiyor.
-      // Masaüstünde (çift sayfa) eskisi gibi tıklama ile de çevrilebiliyor.
-      disableFlipByClick: isSinglePageMode()
+      // Telefon modunda (tek sayfa) kütüphanenin kendi dokunma/tıklama
+      // mantığını TAMAMEN kapatıyoruz. Bu mantık, fiziksel bir sayfa
+      // köşesini kaldırıp sürükleme simülasyonu yaptığı için ekranın
+      // neredeyse bir ucundan diğerine kaydırmayı gerektiriyordu ve yön
+      // de kafa karıştırıcıydı. Sayfa geçişini artık aşağıdaki kendi
+      // basit kaydırma (swipe) algılayıcımız yönetiyor. Masaüstünde
+      // (çift sayfa) eskisi gibi hem tıklama hem sürükleme çalışmaya
+      // devam ediyor.
+      useMouseEvents: !isSinglePageMode()
     });
 
     pageFlip.on('init', function (e) {
@@ -487,6 +492,44 @@
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(rebuildAtCurrentPage, 200);
   });
+
+  // ---- Telefon modunda basit kaydırma (swipe) ile sayfa çevirme ----
+  // Kısa ve doğal bir "sola/sağa kaydır" hareketini kendimiz yakalayıp
+  // doğrudan flipNext()/flipPrev() çağırıyoruz: parmağın gittiği yön
+  // esas alınıyor (sola kaydır -> sonraki sayfa, sağa kaydır -> önceki
+  // sayfa), bu yüzden yön artık kafa karıştırmıyor. Küçük bir mesafe
+  // (MIN_SWIPE) yeterli oluyor, ekranın ucundan ucuna kaydırmaya gerek
+  // kalmıyor. Sadece telefon modunda (isSinglePageMode) çalışır;
+  // masaüstünde StPageFlip'in kendi tıklama/sürükleme mantığı geçerli.
+  const MIN_SWIPE = 40; // px
+  let touchStartX = null;
+  let touchStartY = null;
+
+  wrapperEl.addEventListener('touchstart', function (e) {
+    if (!isSinglePageMode() || !pageFlip) return;
+    const t = e.changedTouches[0];
+    touchStartX = t.clientX;
+    touchStartY = t.clientY;
+  }, { passive: true });
+
+  wrapperEl.addEventListener('touchend', function (e) {
+    if (!isSinglePageMode() || !pageFlip || touchStartX === null) return;
+    const t = e.changedTouches[0];
+    const deltaX = t.clientX - touchStartX;
+    const deltaY = t.clientY - touchStartY;
+    touchStartX = null;
+    touchStartY = null;
+
+    // Yatay hareket, hem eşik değerini hem de dikey hareketi geçmeli
+    // (aksi halde dikey bir dokunuş/kaydırma yanlışlıkla sayfa çevirmesin).
+    if (Math.abs(deltaX) < MIN_SWIPE || Math.abs(deltaX) < Math.abs(deltaY)) return;
+
+    if (deltaX < 0) {
+      pageFlip.flipNext('top');   // sola kaydır -> sonraki sayfa
+    } else {
+      pageFlip.flipPrev('top');   // sağa kaydır -> önceki sayfa
+    }
+  }, { passive: true });
 
   // ---- Sayfaya git kutusu ----
   const pageInput = document.getElementById('pageInput');
