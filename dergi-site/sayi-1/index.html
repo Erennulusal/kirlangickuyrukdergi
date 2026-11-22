@@ -31,12 +31,27 @@
     overflow: hidden;
   }
   #wrapper {
+    position: relative;      /* #book'un konumunu ölçebilmek için */
     width: 100%;
     height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 70px 14px 46px;
+  }
+  /* Telefon modunda yakınlaştırma/kaydırma doğrudan #book'a CSS transform
+     uygulanarak yapılıyor (sol-üst köşe referans alınıyor). */
+  #book {
+    transform-origin: 0 0;
+  }
+  #book.animating {
+    transition: transform 0.25s ease;
+  }
+  /* Telefon modunda tarayıcının kendi kaydırma/yakınlaştırma
+     hareketlerini kapatıyoruz; bunları artık biz yönetiyoruz. */
+  body.single-mode #wrapper,
+  body.single-mode #book {
+    touch-action: none !important;
   }
   #book {
     box-shadow: 0 10px 40px rgba(0,0,0,0.5);
@@ -63,6 +78,47 @@
     font-size: 13px;
     opacity: 0.8;
   }
+  /* ---- Telefon modu: sol/sağ yarı saydam sayfa çevirme butonları ----
+     Sadece telefon modunda (body.single-mode) görünür. İlk sayfada
+     "önceki", son sayfada "sonraki" butonu kendiliğinden gizlenir. */
+  .nav-btn {
+    display: none;
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 44px;
+    height: 76px;
+    padding: 0;
+    border: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.28);
+    color: rgba(255,255,255,0.9);
+    font-size: 34px;
+    line-height: 1;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    z-index: 90;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: opacity 0.2s ease, background 0.15s ease;
+  }
+  .nav-btn:active {
+    background: rgba(0,0,0,0.5);
+  }
+  #navPrev { left: 0;  border-radius: 0 16px 16px 0; }
+  #navNext { right: 0; border-radius: 16px 0 0 16px; }
+  body.single-mode .nav-btn {
+    display: flex;
+  }
+  .nav-btn:disabled {
+    opacity: 0;
+    pointer-events: none;
+  }
+  /* Yakınlaştırılmışken alt ipucu yazısı sayfanın üstüne binmesin */
+  body.zoomed #hint {
+    opacity: 0;
+  }
+
   #topBar {
     position: fixed;
     top: 16px;
@@ -209,6 +265,9 @@
     #hint {
       font-size: 11px;
       bottom: 10px;
+      width: max-content;
+      max-width: calc(100vw - 24px);
+      text-align: center;
     }
   }
 </style>
@@ -218,6 +277,10 @@
 <div id="wrapper">
   <div id="book"></div>
 </div>
+
+<!-- Telefon modu sayfa çevirme butonları (masaüstünde görünmez) -->
+<button id="navPrev" class="nav-btn" aria-label="Önceki sayfa">&#8249;</button>
+<button id="navNext" class="nav-btn" aria-label="Sonraki sayfa">&#8250;</button>
 <div id="hint">Sayfaları çevirmek için sürükle ya da tıkla</div>
 
 <div id="topBar">
@@ -309,6 +372,8 @@
 
   let bookEl = document.getElementById('book'); // "let": her rebuild'de yeni elemanla değiştiriliyor
   const wrapperEl = document.getElementById('wrapper');
+  const navPrevEl = document.getElementById('navPrev');
+  const navNextEl = document.getElementById('navNext');
   const topBarEl = document.getElementById('topBar');
   const hintEl = document.getElementById('hint');
   let pageFlip = null;
@@ -316,6 +381,9 @@
   function updateIndicator(zeroBasedPage) {
     document.getElementById('pageIndicator').textContent =
       (zeroBasedPage + 1) + ' / ' + pages.length;
+    // İlk sayfada "önceki", son sayfada "sonraki" butonu gizlenir.
+    navPrevEl.disabled = zeroBasedPage <= 0;
+    navNextEl.disabled = zeroBasedPage >= pages.length - 1;
   }
 
   // topBar ve hint'in GERÇEK yüksekliğini ölçüp #wrapper'ın boşluğunu
@@ -389,11 +457,15 @@
     buildBook(coverRatio, current);
   }
 
-  // Alt ipucu yazısı, telefon modunda artık tıklama değil kaydırma
-  // (swipe) ile sayfa çevrildiğini belirtecek şekilde güncelleniyor.
+  // Alt ipucu yazısı: telefon modunda sayfa çevirme yan butonlarla,
+  // büyütme iki parmakla (pinch) veya çift dokunmayla yapılıyor.
+  // Ayrıca <body>'ye "single-mode" sınıfı ekleyip çıkararak telefon
+  // moduna özel stilleri (yan butonlar vb.) açıp kapatıyoruz.
   function updateHintText() {
-    hintEl.textContent = isSinglePageMode()
-      ? 'Sayfaları çevirmek için parmağınla sağa/sola kaydır'
+    const single = isSinglePageMode();
+    document.body.classList.toggle('single-mode', single);
+    hintEl.textContent = single
+      ? 'Yan oklarla sayfa çevir · Büyütmek için iki parmakla yakınlaştır'
       : 'Sayfaları çevirmek için sürükle ya da tıkla';
   }
 
@@ -415,6 +487,7 @@
     bookEl = document.createElement('div');
     bookEl.id = 'book';
     wrapperEl.appendChild(bookEl);
+    resetZoom(false); // yeni kitap -> yakınlaştırma 1x
 
     pages.forEach(function (src, idx) {
       const pageDiv = document.createElement('div');
@@ -443,13 +516,11 @@
       flippingTime: isSinglePageMode() ? 1 : 1000,
       drawShadow: !isSinglePageMode(),
       // Telefon modunda (tek sayfa) kütüphanenin kendi dokunma/tıklama
-      // mantığını TAMAMEN kapatıyoruz. Bu mantık, fiziksel bir sayfa
-      // köşesini kaldırıp sürükleme simülasyonu yaptığı için ekranın
-      // neredeyse bir ucundan diğerine kaydırmayı gerektiriyordu ve yön
-      // de kafa karıştırıcıydı. Sayfa geçişini artık aşağıdaki kendi
-      // basit kaydırma (swipe) algılayıcımız yönetiyor. Masaüstünde
-      // (çift sayfa) eskisi gibi hem tıklama hem sürükleme çalışmaya
-      // devam ediyor.
+      // mantığını TAMAMEN kapatıyoruz. Sayfa geçişini artık sol/sağdaki
+      // yarı saydam butonlar yönetiyor; kaydırma hareketi ise sayfayı
+      // çevirmek yerine yakınlaştırılmış sayfada gezmek için kullanılıyor.
+      // Masaüstünde (çift sayfa) eskisi gibi hem tıklama hem sürükleme
+      // çalışmaya devam ediyor.
       useMouseEvents: !isSinglePageMode()
     });
 
@@ -471,6 +542,7 @@
 
     pageFlip.on('flip', function (e) {
       updateIndicator(e.data);
+      resetZoom(false); // yeni sayfaya geçince yakınlaştırma sıfırlanır
       const newUrl = window.location.pathname + '?sayfa=' + (e.data + 1);
       window.history.replaceState(null, '', newUrl);
     });
@@ -496,43 +568,232 @@
     resizeTimer = setTimeout(rebuildAtCurrentPage, 200);
   });
 
-  // ---- Telefon modunda basit kaydırma (swipe) ile sayfa çevirme ----
-  // Kısa ve doğal bir "sola/sağa kaydır" hareketini kendimiz yakalayıp
-  // doğrudan flipNext()/flipPrev() çağırıyoruz: parmağın gittiği yön
-  // esas alınıyor (sola kaydır -> sonraki sayfa, sağa kaydır -> önceki
-  // sayfa), bu yüzden yön artık kafa karıştırmıyor. Küçük bir mesafe
-  // (MIN_SWIPE) yeterli oluyor, ekranın ucundan ucuna kaydırmaya gerek
-  // kalmıyor. Sadece telefon modunda (isSinglePageMode) çalışır;
-  // masaüstünde StPageFlip'in kendi tıklama/sürükleme mantığı geçerli.
-  const MIN_SWIPE = 40; // px
-  let touchStartX = null;
-  let touchStartY = null;
+  // ---- Telefon modu: sayfa çevirme butonları ----
+  // Sol/sağ yarı saydam butonlar sayfayı çevirir. Kaydırma (swipe) ile
+  // sayfa çevirme KALDIRILDI; böylece büyütülmüş sayfada parmakla gezerken
+  // yanlışlıkla sayfa değişmiyor.
+  navPrevEl.addEventListener('click', function () {
+    if (pageFlip) pageFlip.flipPrev('top');
+  });
+  navNextEl.addEventListener('click', function () {
+    if (pageFlip) pageFlip.flipNext('top');
+  });
+
+  // ---- Telefon modu: yakınlaştırma ----
+  //  • İki parmakla aç/kapa (pinch) -> yakınlaştır / uzaklaştır
+  //  • Çift dokun                   -> 2.5x yakınlaştır / tekrar çift dokun: sıfırla
+  //  • Yakınlaştırılmışken tek parmakla sürükle -> sayfada gez
+  // Yakınlaştırma #book'a CSS transform uygulanarak yapılıyor
+  // (kitap yeniden kurulmuyor). Sayfa değişince veya pencere boyutu
+  // değişince yakınlaştırma otomatik olarak 1x'e döner.
+  const ZOOM_MAX = 4;          // en fazla kaç kat büyütülebilir
+  const DOUBLE_TAP_ZOOM = 2.5; // çift dokunmada kaç kat büyütülür
+  let zoomScale = 1;
+  let zoomX = 0;
+  let zoomY = 0;
+  let gesture = null;          // aktif parmak hareketi (pinch / pan)
+  let lastTap = null;          // çift dokunma tespiti için son dokunuş
+  let zoomAnimTimer = null;
+
+  function zoomEnabled() {
+    return isSinglePageMode() && !!pageFlip;
+  }
+
+  // Kitabın (yakınlaştırılmamış haldeki) konumu ve boyutu
+  function layerBox() {
+    return {
+      L: bookEl.offsetLeft,
+      T: bookEl.offsetTop,
+      W: bookEl.offsetWidth,
+      H: bookEl.offsetHeight
+    };
+  }
+
+  // Sayfanın kenarları ekran kenarlarının içine girmesin; sayfa ekrandan
+  // küçükse ortada kalsın.
+  function clampZoom() {
+    const b = layerBox();
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const topLimit = Math.ceil(topBarEl.getBoundingClientRect().bottom) + 6;
+    const cw = b.W * zoomScale;
+    const ch = b.H * zoomScale;
+
+    if (cw <= vw) {
+      zoomX = (b.W - cw) / 2;
+    } else {
+      zoomX = Math.min(-b.L, Math.max(vw - cw - b.L, zoomX));
+    }
+
+    if (ch <= vh - topLimit) {
+      zoomY = (b.H - ch) / 2;
+    } else {
+      zoomY = Math.min(topLimit - b.T, Math.max(vh - ch - b.T, zoomY));
+    }
+  }
+
+  function applyZoom(animate) {
+    clampZoom();
+    clearTimeout(zoomAnimTimer);
+    if (animate) {
+      bookEl.classList.add('animating');
+      zoomAnimTimer = setTimeout(function () {
+        bookEl.classList.remove('animating');
+      }, 300);
+    } else {
+      bookEl.classList.remove('animating');
+    }
+    const isReset = zoomScale === 1 && zoomX === 0 && zoomY === 0;
+    bookEl.style.transform = isReset
+      ? ''
+      : 'translate(' + zoomX + 'px,' + zoomY + 'px) scale(' + zoomScale + ')';
+    document.body.classList.toggle('zoomed', zoomScale > 1);
+  }
+
+  function resetZoom(animate) {
+    zoomScale = 1;
+    zoomX = 0;
+    zoomY = 0;
+    gesture = null;
+    lastTap = null;
+    clearTimeout(zoomAnimTimer);
+    if (animate) {
+      bookEl.classList.add('animating');
+      zoomAnimTimer = setTimeout(function () {
+        bookEl.classList.remove('animating');
+      }, 300);
+    } else {
+      bookEl.classList.remove('animating');
+    }
+    bookEl.style.transform = '';
+    document.body.classList.remove('zoomed');
+  }
+
+  function touchDist(a, b) {
+    return Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+  }
+
+  function startPan(t, moved) {
+    gesture = {
+      type: 'pan',
+      lastX: t.clientX,
+      lastY: t.clientY,
+      startX: t.clientX,
+      startY: t.clientY,
+      t0: Date.now(),
+      moved: !!moved
+    };
+  }
+
+  // Çift dokunma: yakınlaştırılmışsa sıfırla, değilse dokunulan noktaya yakınlaştır
+  function toggleZoomAt(cx, cy) {
+    if (zoomScale > 1.05) {
+      resetZoom(true);
+      return;
+    }
+    const b = layerBox();
+    const px = (cx - b.L - zoomX) / zoomScale;
+    const py = (cy - b.T - zoomY) / zoomScale;
+    zoomScale = DOUBLE_TAP_ZOOM;
+    zoomX = cx - b.L - px * zoomScale;
+    zoomY = cy - b.T - py * zoomScale;
+    applyZoom(true);
+  }
 
   wrapperEl.addEventListener('touchstart', function (e) {
-    if (!isSinglePageMode() || !pageFlip) return;
-    const t = e.changedTouches[0];
-    touchStartX = t.clientX;
-    touchStartY = t.clientY;
-  }, { passive: true });
-
-  wrapperEl.addEventListener('touchend', function (e) {
-    if (!isSinglePageMode() || !pageFlip || touchStartX === null) return;
-    const t = e.changedTouches[0];
-    const deltaX = t.clientX - touchStartX;
-    const deltaY = t.clientY - touchStartY;
-    touchStartX = null;
-    touchStartY = null;
-
-    // Yatay hareket, hem eşik değerini hem de dikey hareketi geçmeli
-    // (aksi halde dikey bir dokunuş/kaydırma yanlışlıkla sayfa çevirmesin).
-    if (Math.abs(deltaX) < MIN_SWIPE || Math.abs(deltaX) < Math.abs(deltaY)) return;
-
-    if (deltaX < 0) {
-      pageFlip.flipNext('top');   // sola kaydır -> sonraki sayfa
-    } else {
-      pageFlip.flipPrev('top');   // sağa kaydır -> önceki sayfa
+    if (!zoomEnabled()) return;
+    bookEl.classList.remove('animating');
+    if (e.touches.length >= 2) {
+      const a = e.touches[0];
+      const c = e.touches[1];
+      const b = layerBox();
+      const mx = (a.clientX + c.clientX) / 2;
+      const my = (a.clientY + c.clientY) / 2;
+      gesture = {
+        type: 'pinch',
+        d0: touchDist(a, c) || 1,
+        s0: zoomScale,
+        // İki parmağın ortasındaki sayfa noktası (sayfa koordinatında);
+        // yakınlaştırırken bu nokta parmakların altında kalıyor.
+        px: (mx - b.L - zoomX) / zoomScale,
+        py: (my - b.T - zoomY) / zoomScale
+      };
+    } else if (e.touches.length === 1) {
+      startPan(e.touches[0], false);
     }
   }, { passive: true });
+
+  wrapperEl.addEventListener('touchmove', function (e) {
+    if (!zoomEnabled() || !gesture) return;
+    e.preventDefault(); // tarayıcının kendi kaydırma/yakınlaştırmasını engelle
+
+    if (gesture.type === 'pinch' && e.touches.length >= 2) {
+      const a = e.touches[0];
+      const c = e.touches[1];
+      const b = layerBox();
+      const mx = (a.clientX + c.clientX) / 2;
+      const my = (a.clientY + c.clientY) / 2;
+      const s = gesture.s0 * touchDist(a, c) / gesture.d0;
+      zoomScale = Math.min(ZOOM_MAX, Math.max(1, s));
+      zoomX = mx - b.L - gesture.px * zoomScale;
+      zoomY = my - b.T - gesture.py * zoomScale;
+      applyZoom(false);
+    } else if (gesture.type === 'pan' && e.touches.length === 1) {
+      const t = e.touches[0];
+      if (Math.abs(t.clientX - gesture.startX) > 10 ||
+          Math.abs(t.clientY - gesture.startY) > 10) {
+        gesture.moved = true;
+      }
+      if (zoomScale > 1) {
+        zoomX += t.clientX - gesture.lastX;
+        zoomY += t.clientY - gesture.lastY;
+        applyZoom(false);
+      }
+      gesture.lastX = t.clientX;
+      gesture.lastY = t.clientY;
+    }
+  }, { passive: false });
+
+  function onZoomTouchEnd(e) {
+    if (!zoomEnabled()) return;
+
+    if (e.touches.length >= 2) return;
+
+    // İki parmaktan biri kalktı: kalan parmakla kesintisiz gezmeye devam et
+    if (e.touches.length === 1) {
+      startPan(e.touches[0], true);
+      return;
+    }
+
+    // Tüm parmaklar kalktı
+    const wasTap = gesture && gesture.type === 'pan' && !gesture.moved &&
+                   (Date.now() - gesture.t0) < 300;
+    const touch = e.changedTouches[0];
+    gesture = null;
+
+    if (zoomScale < 1.03) {
+      // Neredeyse 1x ise tam 1x'e oturt
+      if (zoomScale !== 1) resetZoom(true);
+    }
+
+    if (wasTap && e.type === 'touchend' && touch) {
+      const now = Date.now();
+      if (lastTap && (now - lastTap.time) < 320 &&
+          Math.hypot(touch.clientX - lastTap.x, touch.clientY - lastTap.y) < 40) {
+        lastTap = null;
+        toggleZoomAt(touch.clientX, touch.clientY);
+      } else {
+        lastTap = { time: now, x: touch.clientX, y: touch.clientY };
+      }
+    }
+  }
+  wrapperEl.addEventListener('touchend', onZoomTouchEnd, { passive: true });
+  wrapperEl.addEventListener('touchcancel', onZoomTouchEnd, { passive: true });
+
+  // iOS Safari'nin sayfa geneli pinch-zoom'unu engelle (biz yönetiyoruz)
+  document.addEventListener('gesturestart', function (e) {
+    if (isSinglePageMode()) e.preventDefault();
+  }, { passive: false });
 
   // ---- Sayfaya git kutusu ----
   const pageInput = document.getElementById('pageInput');
@@ -546,6 +807,7 @@
       setTimeout(() => { pageInput.style.background = ''; }, 400);
       return;
     }
+    resetZoom(false);
     pageFlip.turnToPage(num - 1);
   }
 
