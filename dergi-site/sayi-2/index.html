@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kırlangıçkuyruk Dergi - Sayı 2</title>
+
+<!-- Site logosu / sekme ikonu. favicon.svg dosyası deponun KÖK klasöründe
+     olmalı (index.html ile aynı yerde). Bu sayfa dergi-site/sayi-1/ içinde
+     olduğu için iki klasör yukarı çıkıyoruz. -->
+<link rel="icon" type="image/svg+xml" href="../../logosayi1.png">
+
+<meta property="og:title" content="Kırlangıçkuyruk Dergi - Sayı 2">
+<meta property="og:description" content="Dergimizin 2. sayısını buradan ücretsiz okuyabilirsin.">
+<meta property="og:image" content="https://erennulusal.github.io/kirlangickuyrukdergi/sayi-2/Kırlangıçkuyruk_Dergi2_1.jpg">
+<meta property="og:url" content="https://erennulusal.github.io/kirlangickuyrukdergi/sayi-2/">
+<meta property="og:type" content="article">
+<meta name="twitter:card" content="summary_large_image">
+
+<script data-goatcounter="https://erennulusal.goatcounter.com/count"
+       async src="//gc.zgo.at/count.js"></script>     
+
+<style>
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: #1a1a1a;
+    font-family: Arial, Helvetica, sans-serif;
+    overflow: hidden;
+  }
+  #wrapper {
+    position: relative;      /* #book'un konumunu ölçebilmek için */
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 70px 14px 46px;
+  }
+  /* Telefon modunda yakınlaştırma/kaydırma doğrudan #book'a CSS transform
+     uygulanarak yapılıyor (sol-üst köşe referans alınıyor). */
+  #book {
+    transform-origin: 0 0;
+  }
+  #book.animating {
+    transition: transform 0.25s ease;
+  }
+  /* Telefon modunda tarayıcının kendi kaydırma/yakınlaştırma
+     hareketlerini kapatıyoruz; bunları artık biz yönetiyoruz. */
+  body.single-mode #wrapper,
+  body.single-mode #book {
+    touch-action: none !important;
+  }
+  #book {
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+  }
+  .page {
+    background: #fff;
+    overflow: hidden;
+  }
+  .page img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    -webkit-user-select: none;
+    user-select: none;
+    pointer-events: none;
+  }
+  #hint {
+    position: fixed;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #999;
+    font-size: 13px;
+    opacity: 0.8;
+  }
+  /* ---- Telefon modu: sol/sağ yarı saydam sayfa çevirme butonları ----
+     Sadece telefon modunda (body.single-mode) görünür. İlk sayfada
+     "önceki", son sayfada "sonraki" butonu kendiliğinden gizlenir. */
+  .nav-btn {
+    display: none;
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 44px;
+    height: 76px;
+    padding: 0;
+    border: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.28);
+    color: rgba(255,255,255,0.9);
+    font-size: 34px;
+    line-height: 1;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    z-index: 90;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: opacity 0.2s ease, background 0.15s ease;
+  }
+  .nav-btn:active {
+    background: rgba(0,0,0,0.5);
+  }
+  #navPrev { left: 0;  border-radius: 0 16px 16px 0; }
+  #navNext { right: 0; border-radius: 16px 0 0 16px; }
+  body.single-mode .nav-btn {
+    display: flex;
+  }
+  .nav-btn:disabled {
+    opacity: 0;
+    pointer-events: none;
+  }
+  /* Yakınlaştırılmışken alt ipucu yazısı sayfanın üstüne binmesin */
+  body.zoomed #hint {
+    opacity: 0;
+  }
+
+  #topBar {
+    position: fixed;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    background: #202020;
+    padding: 8px 18px;
+    border-radius: 24px;
+    border: 1px solid rgba(255,255,255,0.15);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    z-index: 100;
+  }
+  #topBar a.back-link {
+    color: #ddd;
+    text-decoration: none;
+    font-size: 13px;
+    white-space: nowrap;
+    padding-right: 16px;
+    border-right: 1px solid rgba(255,255,255,0.15);
+    transition: color 0.15s ease;
+  }
+  #topBar a.back-link:hover {
+    color: #fff;
+  }
+  .jump-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .jump-group .jlabel {
+    color: #aaa;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+  #pageInput {
+    width: 48px;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.3);
+    background: #2e2e2e;
+    color: #fff;
+    border-radius: 14px;
+    padding: 6px 4px;
+    font-size: 13px;
+    outline: none;
+  }
+  #pageInput:focus {
+    border-color: #c99a3d;
+  }
+  #pageInput::-webkit-outer-spin-button,
+  #pageInput::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  #pageGoBtn, #fullscreenBtn {
+    border: none;
+    border-radius: 14px;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    background: #c99a3d;
+    color: #1a1a1a;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    white-space: nowrap;
+  }
+  #pageGoBtn:hover, #fullscreenBtn:hover {
+    background: #ddb35c;
+  }
+  #pageGoBtn {
+    background: #4715ab;
+    color: #fff;
+  }
+  #pageGoBtn:hover {
+    background: #5c22d6;
+  }
+  #fullscreenBtn {
+    padding-left: 16px;
+    border-left: 1px solid rgba(255,255,255,0.15);
+    border-radius: 0;
+    padding: 6px 0 6px 16px;
+    background: none;
+    color: #ddd;
+  }
+  #fullscreenBtn:hover {
+    background: none;
+    color: #fff;
+  }
+  #pageIndicator {
+    color: #ccc;
+    font-size: 12px;
+    background: #2e2e2e;
+    padding: 5px 12px;
+    border-radius: 14px;
+    min-width: 46px;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  /* ---- TELEFON MODU ----
+     Dar ekranlarda üst bar ekrana sığsın diye sıkılaştırıyoruz:
+     yazılar küçülüyor, aralar daralıyor, "Sayfaya git:" etiketi ve
+     tam ekran butonunun yazısı gizleniyor (ikon kalıyor). Masaüstü
+     görünümü bundan hiç etkilenmiyor. */
+  @media (max-width: 700px) {
+    #topBar {
+      top: 8px;
+      gap: 8px;
+      padding: 6px 12px;
+      max-width: calc(100vw - 16px);
+    }
+    #topBar a.back-link {
+      font-size: 12px;
+      padding-right: 8px;
+    }
+    .jump-group { gap: 5px; }
+    .jump-group .jlabel { display: none; }
+    #pageInput {
+      width: 42px;
+      font-size: 12px;
+      padding: 5px 3px;
+    }
+    #pageGoBtn {
+      font-size: 12px;
+      padding: 5px 10px;
+    }
+    #pageIndicator {
+      font-size: 11px;
+      padding: 4px 9px;
+      min-width: 40px;
+    }
+    #fullscreenBtn {
+      font-size: 0;            /* yazıyı gizle, sadece ikon kalsın */
+      padding: 5px 0 5px 10px;
+    }
+    #fullscreenBtn::before {
+      content: '⛶';
+      font-size: 15px;
+    }
+    #hint {
+      font-size: 11px;
+      bottom: 10px;
+      width: max-content;
+      max-width: calc(100vw - 24px);
+      text-align: center;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div id="wrapper">
+  <div id="book"></div>
+</div>
+
+<!-- Telefon modu sayfa çevirme butonları (masaüstünde görünmez) -->
+<button id="navPrev" class="nav-btn" aria-label="Önceki sayfa">&#8249;</button>
+<button id="navNext" class="nav-btn" aria-label="Sonraki sayfa">&#8250;</button>
+<div id="hint">Sayfaları çevirmek için sürükle ya da tıkla</div>
+
+<div id="topBar">
+  <a href="../../index.html" class="back-link">Tüm sayılar</a>
+  <div class="jump-group">
+    <span class="jlabel">Sayfaya git:</span>
+    <input type="number" id="pageInput" min="1" placeholder="1-66">
+    <button id="pageGoBtn">Git</button>
+  </div>
+  <span id="pageIndicator">- / -</span>
+  <button id="fullscreenBtn">⛶ Tam ekran</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/page-flip/dist/js/page-flip.browser.min.js"></script>
+<script>
+
+  const pages = [
+    "Kırlangıçkuyruk_Dergi2_1.jpg",
+    "Kırlangıçkuyruk_Dergi2_2.jpg",
+    "Kırlangıçkuyruk_Dergi2_3.jpg",
+    "Kırlangıçkuyruk_Dergi2_4.jpg",
+    "Kırlangıçkuyruk_Dergi2_5.jpg",
+    "Kırlangıçkuyruk_Dergi2_6.jpg",
+    "Kırlangıçkuyruk_Dergi2_7.jpg",
+    "Kırlangıçkuyruk_Dergi2_8.jpg",
+    "Kırlangıçkuyruk_Dergi2_9.jpg",
+    "Kırlangıçkuyruk_Dergi2_10.jpg",
+    "Kırlangıçkuyruk_Dergi2_11.jpg",
+    "Kırlangıçkuyruk_Dergi2_12.jpg",
+    "Kırlangıçkuyruk_Dergi2_13.jpg",
+    "Kırlangıçkuyruk_Dergi2_14.jpg",
+    "Kırlangıçkuyruk_Dergi2_15.jpg",
+    "Kırlangıçkuyruk_Dergi2_16.jpg",
+    "Kırlangıçkuyruk_Dergi2_17.jpg",
+    "Kırlangıçkuyruk_Dergi2_18.jpg",
+    "Kırlangıçkuyruk_Dergi2_19.jpg",
+    "Kırlangıçkuyruk_Dergi2_20.jpg",
+    "Kırlangıçkuyruk_Dergi2_21.jpg",
+    "Kırlangıçkuyruk_Dergi2_22.jpg",
+    "Kırlangıçkuyruk_Dergi2_23.jpg",
+    "Kırlangıçkuyruk_Dergi2_24.jpg",
+    "Kırlangıçkuyruk_Dergi2_25.jpg",
+    "Kırlangıçkuyruk_Dergi2_26.jpg",
+    "Kırlangıçkuyruk_Dergi2_27.jpg",
+    "Kırlangıçkuyruk_Dergi2_28.jpg",
+    "Kırlangıçkuyruk_Dergi2_29.jpg",
+    "Kırlangıçkuyruk_Dergi2_30.jpg",
+    "Kırlangıçkuyruk_Dergi2_31.jpg",
+    "Kırlangıçkuyruk_Dergi2_32.jpg",
+    "Kırlangıçkuyruk_Dergi2_33.jpg",
+    "Kırlangıçkuyruk_Dergi2_34.jpg",
+    "Kırlangıçkuyruk_Dergi2_35.jpg",
+    "Kırlangıçkuyruk_Dergi2_36.jpg",
+    "Kırlangıçkuyruk_Dergi2_37.jpg",
+    "Kırlangıçkuyruk_Dergi2_38.jpg",
+    "Kırlangıçkuyruk_Dergi2_39.jpg",
+    "Kırlangıçkuyruk_Dergi2_40.jpg",
+    "Kırlangıçkuyruk_Dergi2_41.jpg",
+    "Kırlangıçkuyruk_Dergi2_42.jpg",
+    "Kırlangıçkuyruk_Dergi2_43.jpg",
+    "Kırlangıçkuyruk_Dergi2_44.jpg",
+    "Kırlangıçkuyruk_Dergi2_45.jpg",
+    "Kırlangıçkuyruk_Dergi2_46.jpg",
+    "Kırlangıçkuyruk_Dergi2_47.jpg",
+    "Kırlangıçkuyruk_Dergi2_48.jpg",
+    "Kırlangıçkuyruk_Dergi2_49.jpg",
+    "Kırlangıçkuyruk_Dergi2_50.jpg",
+    "Kırlangıçkuyruk_Dergi2_51.jpg",
+    "Kırlangıçkuyruk_Dergi2_52.jpg",
+    "Kırlangıçkuyruk_Dergi2_53.jpg",
+    "Kırlangıçkuyruk_Dergi2_54.jpg",
+    "Kırlangıçkuyruk_Dergi2_55.jpg",
+    "Kırlangıçkuyruk_Dergi2_56.jpg"
+  ];
+  // ================================================================
+
+  document.getElementById('pageInput').setAttribute('max', pages.length);
+  document.getElementById('pageInput').setAttribute('placeholder', '1-' + pages.length);
+
+  let bookEl = document.getElementById('book'); // "let": her rebuild'de yeni elemanla değiştiriliyor
+  const wrapperEl = document.getElementById('wrapper');
+  const navPrevEl = document.getElementById('navPrev');
+  const navNextEl = document.getElementById('navNext');
+  const topBarEl = document.getElementById('topBar');
+  const hintEl = document.getElementById('hint');
+  let pageFlip = null;
+
+  function updateIndicator(zeroBasedPage) {
+    document.getElementById('pageIndicator').textContent =
+      (zeroBasedPage + 1) + ' / ' + pages.length;
+    // İlk sayfada "önceki", son sayfada "sonraki" butonu gizlenir.
+    navPrevEl.disabled = zeroBasedPage <= 0;
+    navNextEl.disabled = zeroBasedPage >= pages.length - 1;
+  }
+
+  // topBar ve hint'in GERÇEK yüksekliğini ölçüp #wrapper'ın boşluğunu
+  // ona göre ayarlıyoruz. GUI kitabın üstüne binmiyor, ama gereğinden
+  // fazla boşluk da bırakılmıyor - kitap mümkün olduğunca büyük kalıyor.
+  function applyReserves() {
+    const gap = 10; // GUI ile kitap arasındaki nefes payı
+    const topBarRect = topBarEl.getBoundingClientRect();
+    const hintRect = hintEl.getBoundingClientRect();
+    const topReserve = Math.ceil(topBarRect.bottom + gap);
+    const bottomReserve = Math.ceil((window.innerHeight - hintRect.top) + gap);
+    const sidePadding = window.innerWidth < 700 ? 8 : 16;
+
+    wrapperEl.style.padding = topReserve + 'px ' + sidePadding + 'px ' + bottomReserve + 'px';
+
+    return {
+      availWidth: Math.max(280, window.innerWidth - sidePadding * 2),
+      availHeight: Math.max(320, window.innerHeight - topReserve - bottomReserve)
+    };
+  }
+
+  // TELEFON MODU: dar ekranlarda dergiyi çift sayfa (spread) yerine
+  // TEK sayfa olarak gösteriyoruz. Bunu ayrı bir ayarla değil, sayfa
+  // genişliğini hesaplarken ikiye bölmeyerek yapıyoruz: sayfa, kabına
+  // sığmayacak kadar geniş olunca StPageFlip zaten kendiliğinden
+  // "portrait" (tek sayfa) moduna geçiyor (usePortrait: true sayesinde).
+  function isSinglePageMode() {
+    return window.innerWidth < 700;
+  }
+
+  function computePageSize(ratio, naturalWidth) {
+    const { availWidth, availHeight } = applyReserves();
+
+    let pageWidth = isSinglePageMode() ? availWidth : availWidth / 2;
+    let pageHeight = pageWidth * ratio;
+
+    if (pageHeight > availHeight) {
+      pageHeight = availHeight;
+      pageWidth = pageHeight / ratio;
+    }
+
+    if (naturalWidth) {
+      const dpr = window.devicePixelRatio || 1;
+      const maxWidthFromSource = naturalWidth / dpr;
+      if (pageWidth > maxWidthFromSource) {
+        pageWidth = maxWidthFromSource;
+        pageHeight = pageWidth * ratio;
+      }
+    }
+
+    return {
+      width: Math.round(Math.max(160, pageWidth)),
+      height: Math.round(Math.max(220, pageHeight))
+    };
+  }
+
+  let coverRatio = null;
+  let coverNaturalWidth = null;
+
+  // Pencere boyutu her değiştiğinde (yeniden boyutlandırma, tam ekrana
+  // giriş/çıkış, mobilde adres çubuğunun gizlenmesi vs.) kitabı CSS ile
+  // küçültüp bulanıklaştırmak yerine, o anki gerçek piksel ölçüleriyle
+  // SIFIRDAN kuruyoruz. Bu yüzden sayfalar her zaman keskin kalıyor.
+  function rebuildAtCurrentPage() {
+    if (!coverRatio) return;
+    const current = pageFlip ? pageFlip.getCurrentPageIndex() : 0;
+    if (pageFlip) {
+      pageFlip.destroy();
+      pageFlip = null;
+    }
+    buildBook(coverRatio, current);
+  }
+
+  // Alt ipucu yazısı: telefon modunda sayfa çevirme yan butonlarla,
+  // büyütme iki parmakla (pinch) veya çift dokunmayla yapılıyor.
+  // Ayrıca <body>'ye "single-mode" sınıfı ekleyip çıkararak telefon
+  // moduna özel stilleri (yan butonlar vb.) açıp kapatıyoruz.
+  function updateHintText() {
+    const single = isSinglePageMode();
+    document.body.classList.toggle('single-mode', single);
+    hintEl.textContent = single
+      ? 'Yan oklarla sayfa çevir · Büyütmek için iki parmakla yakınlaştır'
+      : 'Sayfaları çevirmek için sürükle ya da tıkla';
+  }
+
+  function buildBook(ratio, startPage) {
+    updateHintText();
+    const size = computePageSize(ratio, coverNaturalWidth);
+
+    // ÖNEMLİ DÜZELTME: pageFlip.destroy() sadece içeriği temizlemiyor,
+    // bağlı olduğu #book elemanının KENDİSİNİ DOM'dan kaldırıyor
+    // ("Remove a root HTML element" - StPageFlip dokümantasyonu).
+    // Aynı (artık kaldırılmış) elemanı tekrar kullanmaya çalışmak,
+    // özellikle tam ekrana geçince kitabın görünmez olmasına sebep
+    // oluyordu. Çözüm: her kurulumda sıfırdan yeni bir #book elemanı
+    // oluşturup onu kullanmak.
+    const oldBookEl = document.getElementById('book');
+    if (oldBookEl && oldBookEl.parentNode) {
+      oldBookEl.parentNode.removeChild(oldBookEl);
+    }
+    bookEl = document.createElement('div');
+    bookEl.id = 'book';
+    wrapperEl.appendChild(bookEl);
+    resetZoom(false); // yeni kitap -> yakınlaştırma 1x
+
+    pages.forEach(function (src, idx) {
+      const pageDiv = document.createElement('div');
+      pageDiv.className = 'page';
+      if (idx === 0 || idx === pages.length - 1) {
+        pageDiv.setAttribute('data-density', 'hard');
+      }
+      const img = document.createElement('img');
+      img.src = src;
+      img.draggable = false;
+      pageDiv.appendChild(img);
+      bookEl.appendChild(pageDiv);
+    });
+
+    pageFlip = new St.PageFlip(bookEl, {
+      width: size.width,
+      height: size.height,
+      size: "fixed",
+      showCover: true,
+      mobileScrollSupport: true,
+      usePortrait: true,
+      // Telefon modunda (tek sayfa) çevirme animasyonu tamamen kapalı:
+      // sayfa anında değişiyor, kıvrılma/gölge yok. Masaüstünde
+      // (çift sayfa/spread) animasyon aynen eskisi gibi çalışmaya devam
+      // ediyor.
+      flippingTime: isSinglePageMode() ? 1 : 1000,
+      drawShadow: !isSinglePageMode(),
+      // Telefon modunda (tek sayfa) kütüphanenin kendi dokunma/tıklama
+      // mantığını TAMAMEN kapatıyoruz. Sayfa geçişini artık sol/sağdaki
+      // yarı saydam butonlar yönetiyor; kaydırma hareketi ise sayfayı
+      // çevirmek yerine yakınlaştırılmış sayfada gezmek için kullanılıyor.
+      // Masaüstünde (çift sayfa) eskisi gibi hem tıklama hem sürükleme
+      // çalışmaya devam ediyor.
+      useMouseEvents: !isSinglePageMode()
+    });
+
+    pageFlip.on('init', function (e) {
+      let initial = e.data.page;
+      if (typeof startPage === 'number' && startPage >= 0 && startPage < pages.length) {
+        initial = startPage;
+        pageFlip.turnToPage(initial);
+      } else {
+        const params = new URLSearchParams(window.location.search);
+        const requested = parseInt(params.get('sayfa'), 10);
+        if (!isNaN(requested) && requested >= 1 && requested <= pages.length) {
+          initial = requested - 1;
+          pageFlip.turnToPage(initial);
+        }
+      }
+      updateIndicator(initial);
+    });
+
+    pageFlip.on('flip', function (e) {
+      updateIndicator(e.data);
+      resetZoom(false); // yeni sayfaya geçince yakınlaştırma sıfırlanır
+      const newUrl = window.location.pathname + '?sayfa=' + (e.data + 1);
+      window.history.replaceState(null, '', newUrl);
+    });
+
+    pageFlip.loadFromHTML(bookEl.querySelectorAll('.page'));
+  }
+
+  const testImg = new Image();
+  testImg.onload = function () {
+    coverRatio = testImg.naturalHeight / testImg.naturalWidth;
+    coverNaturalWidth = testImg.naturalWidth;
+    buildBook(coverRatio);
+  };
+  testImg.onerror = function () {
+    document.getElementById('hint').textContent =
+      "Görsel bulunamadı. 'pages' listesindeki dosya adlarını kontrol et.";
+  };
+  testImg.src = pages[0];
+
+  let resizeTimer = null;
+  window.addEventListener('resize', function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(rebuildAtCurrentPage, 200);
+  });
+
+  // ---- Telefon modu: sayfa çevirme butonları ----
+  // Sol/sağ yarı saydam butonlar sayfayı çevirir. Kaydırma (swipe) ile
+  // sayfa çevirme KALDIRILDI; böylece büyütülmüş sayfada parmakla gezerken
+  // yanlışlıkla sayfa değişmiyor.
+  navPrevEl.addEventListener('click', function () {
+    if (pageFlip) pageFlip.flipPrev('top');
+  });
+  navNextEl.addEventListener('click', function () {
+    if (pageFlip) pageFlip.flipNext('top');
+  });
+
+  // ---- Telefon modu: yakınlaştırma ----
+  //  • İki parmakla aç/kapa (pinch) -> yakınlaştır / uzaklaştır
+  //  • Çift dokun                   -> 2.5x yakınlaştır / tekrar çift dokun: sıfırla
+  //  • Yakınlaştırılmışken tek parmakla sürükle -> sayfada gez
+  // Yakınlaştırma #book'a CSS transform uygulanarak yapılıyor
+  // (kitap yeniden kurulmuyor). Sayfa değişince veya pencere boyutu
+  // değişince yakınlaştırma otomatik olarak 1x'e döner.
+  const ZOOM_MAX = 4;          // en fazla kaç kat büyütülebilir
+  const DOUBLE_TAP_ZOOM = 2.5; // çift dokunmada kaç kat büyütülür
+  let zoomScale = 1;
+  let zoomX = 0;
+  let zoomY = 0;
+  let gesture = null;          // aktif parmak hareketi (pinch / pan)
+  let lastTap = null;          // çift dokunma tespiti için son dokunuş
+  let zoomAnimTimer = null;
+
+  function zoomEnabled() {
+    return isSinglePageMode() && !!pageFlip;
+  }
+
+  // Kitabın (yakınlaştırılmamış haldeki) konumu ve boyutu
+  function layerBox() {
+    return {
+      L: bookEl.offsetLeft,
+      T: bookEl.offsetTop,
+      W: bookEl.offsetWidth,
+      H: bookEl.offsetHeight
+    };
+  }
+
+  // Sayfanın kenarları ekran kenarlarının içine girmesin; sayfa ekrandan
+  // küçükse ortada kalsın.
+  function clampZoom() {
+    const b = layerBox();
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const topLimit = Math.ceil(topBarEl.getBoundingClientRect().bottom) + 6;
+    const cw = b.W * zoomScale;
+    const ch = b.H * zoomScale;
+
+    if (cw <= vw) {
+      zoomX = (b.W - cw) / 2;
+    } else {
+      zoomX = Math.min(-b.L, Math.max(vw - cw - b.L, zoomX));
+    }
+
+    if (ch <= vh - topLimit) {
+      zoomY = (b.H - ch) / 2;
+    } else {
+      zoomY = Math.min(topLimit - b.T, Math.max(vh - ch - b.T, zoomY));
+    }
+  }
+
+  function applyZoom(animate) {
+    clampZoom();
+    clearTimeout(zoomAnimTimer);
+    if (animate) {
+      bookEl.classList.add('animating');
+      zoomAnimTimer = setTimeout(function () {
+        bookEl.classList.remove('animating');
+      }, 300);
+    } else {
+      bookEl.classList.remove('animating');
+    }
+    const isReset = zoomScale === 1 && zoomX === 0 && zoomY === 0;
+    bookEl.style.transform = isReset
+      ? ''
+      : 'translate(' + zoomX + 'px,' + zoomY + 'px) scale(' + zoomScale + ')';
+    document.body.classList.toggle('zoomed', zoomScale > 1);
+  }
+
+  function resetZoom(animate) {
+    zoomScale = 1;
+    zoomX = 0;
+    zoomY = 0;
+    gesture = null;
+    lastTap = null;
+    clearTimeout(zoomAnimTimer);
+    if (animate) {
+      bookEl.classList.add('animating');
+      zoomAnimTimer = setTimeout(function () {
+        bookEl.classList.remove('animating');
+      }, 300);
+    } else {
+      bookEl.classList.remove('animating');
+    }
+    bookEl.style.transform = '';
+    document.body.classList.remove('zoomed');
+  }
+
+  function touchDist(a, b) {
+    return Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+  }
+
+  function startPan(t, moved) {
+    gesture = {
+      type: 'pan',
+      lastX: t.clientX,
+      lastY: t.clientY,
+      startX: t.clientX,
+      startY: t.clientY,
+      t0: Date.now(),
+      moved: !!moved
+    };
+  }
+
+  // Çift dokunma: yakınlaştırılmışsa sıfırla, değilse dokunulan noktaya yakınlaştır
+  function toggleZoomAt(cx, cy) {
+    if (zoomScale > 1.05) {
+      resetZoom(true);
+      return;
+    }
+    const b = layerBox();
+    const px = (cx - b.L - zoomX) / zoomScale;
+    const py = (cy - b.T - zoomY) / zoomScale;
+    zoomScale = DOUBLE_TAP_ZOOM;
+    zoomX = cx - b.L - px * zoomScale;
+    zoomY = cy - b.T - py * zoomScale;
+    applyZoom(true);
+  }
+
+  wrapperEl.addEventListener('touchstart', function (e) {
+    if (!zoomEnabled()) return;
+    bookEl.classList.remove('animating');
+    if (e.touches.length >= 2) {
+      const a = e.touches[0];
+      const c = e.touches[1];
+      const b = layerBox();
+      const mx = (a.clientX + c.clientX) / 2;
+      const my = (a.clientY + c.clientY) / 2;
+      gesture = {
+        type: 'pinch',
+        d0: touchDist(a, c) || 1,
+        s0: zoomScale,
+        // İki parmağın ortasındaki sayfa noktası (sayfa koordinatında);
+        // yakınlaştırırken bu nokta parmakların altında kalıyor.
+        px: (mx - b.L - zoomX) / zoomScale,
+        py: (my - b.T - zoomY) / zoomScale
+      };
+    } else if (e.touches.length === 1) {
+      startPan(e.touches[0], false);
+    }
+  }, { passive: true });
+
+  wrapperEl.addEventListener('touchmove', function (e) {
+    if (!zoomEnabled() || !gesture) return;
+    e.preventDefault(); // tarayıcının kendi kaydırma/yakınlaştırmasını engelle
+
+    if (gesture.type === 'pinch' && e.touches.length >= 2) {
+      const a = e.touches[0];
+      const c = e.touches[1];
+      const b = layerBox();
+      const mx = (a.clientX + c.clientX) / 2;
+      const my = (a.clientY + c.clientY) / 2;
+      const s = gesture.s0 * touchDist(a, c) / gesture.d0;
+      zoomScale = Math.min(ZOOM_MAX, Math.max(1, s));
+      zoomX = mx - b.L - gesture.px * zoomScale;
+      zoomY = my - b.T - gesture.py * zoomScale;
+      applyZoom(false);
+    } else if (gesture.type === 'pan' && e.touches.length === 1) {
+      const t = e.touches[0];
+      if (Math.abs(t.clientX - gesture.startX) > 10 ||
+          Math.abs(t.clientY - gesture.startY) > 10) {
+        gesture.moved = true;
+      }
+      if (zoomScale > 1) {
+        zoomX += t.clientX - gesture.lastX;
+        zoomY += t.clientY - gesture.lastY;
+        applyZoom(false);
+      }
+      gesture.lastX = t.clientX;
+      gesture.lastY = t.clientY;
+    }
+  }, { passive: false });
+
+  function onZoomTouchEnd(e) {
+    if (!zoomEnabled()) return;
+
+    if (e.touches.length >= 2) return;
+
+    // İki parmaktan biri kalktı: kalan parmakla kesintisiz gezmeye devam et
+    if (e.touches.length === 1) {
+      startPan(e.touches[0], true);
+      return;
+    }
+
+    // Tüm parmaklar kalktı
+    const wasTap = gesture && gesture.type === 'pan' && !gesture.moved &&
+                   (Date.now() - gesture.t0) < 300;
+    const touch = e.changedTouches[0];
+    gesture = null;
+
+    if (zoomScale < 1.03) {
+      // Neredeyse 1x ise tam 1x'e oturt
+      if (zoomScale !== 1) resetZoom(true);
+    }
+
+    if (wasTap && e.type === 'touchend' && touch) {
+      const now = Date.now();
+      if (lastTap && (now - lastTap.time) < 320 &&
+          Math.hypot(touch.clientX - lastTap.x, touch.clientY - lastTap.y) < 40) {
+        lastTap = null;
+        toggleZoomAt(touch.clientX, touch.clientY);
+      } else {
+        lastTap = { time: now, x: touch.clientX, y: touch.clientY };
+      }
+    }
+  }
+  wrapperEl.addEventListener('touchend', onZoomTouchEnd, { passive: true });
+  wrapperEl.addEventListener('touchcancel', onZoomTouchEnd, { passive: true });
+
+  // iOS Safari'nin sayfa geneli pinch-zoom'unu engelle (biz yönetiyoruz)
+  document.addEventListener('gesturestart', function (e) {
+    if (isSinglePageMode()) e.preventDefault();
+  }, { passive: false });
+
+  // ---- Sayfaya git kutusu ----
+  const pageInput = document.getElementById('pageInput');
+  const pageGoBtn = document.getElementById('pageGoBtn');
+
+  function goToTypedPage() {
+    if (!pageFlip) return;
+    const num = parseInt(pageInput.value, 10);
+    if (isNaN(num) || num < 1 || num > pages.length) {
+      pageInput.style.background = '#ffb3b3';
+      setTimeout(() => { pageInput.style.background = ''; }, 400);
+      return;
+    }
+    resetZoom(false);
+    pageFlip.turnToPage(num - 1);
+  }
+
+  pageGoBtn.addEventListener('click', goToTypedPage);
+  pageInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') goToTypedPage();
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (document.activeElement === pageInput) return;
+    if (!pageFlip) return;
+
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      pageFlip.flipNext('top');
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      pageFlip.flipPrev('top');
+    }
+  });
+
+  const fullscreenBtn = document.getElementById('fullscreenBtn');
+
+  function isFullscreen() {
+    return !!(document.fullscreenElement || document.webkitFullscreenElement);
+  }
+
+  function updateFullscreenLabel() {
+    fullscreenBtn.textContent = isFullscreen() ? '⛶ Tam ekrandan çık' : '⛶ Tam ekran';
+  }
+
+  fullscreenBtn.addEventListener('click', function () {
+    const el = document.documentElement;
+    if (!isFullscreen()) {
+      if (el.requestFullscreen) el.requestFullscreen();
+      else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+    } else {
+      if (document.exitFullscreen) document.exitFullscreen();
+      else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+    }
+  });
+
+  document.addEventListener('fullscreenchange', function () {
+    updateFullscreenLabel();
+    rebuildAtCurrentPage();
+  });
+  document.addEventListener('webkitfullscreenchange', function () {
+    updateFullscreenLabel();
+    rebuildAtCurrentPage();
+  });
+</script>
+
+</body>
+</html>
